@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475693958093.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "F03E748C",
+    "lastKnownWriteTime" : 3414137952484196358,
+    "last_content_update" : 1475693958093,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "cht85rgo3s",
+        "caption" : "checkins2",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=checkins2&cache_key=cht85rgo3s",
+        "displayedObservations" : "170",
+        "environment" : "",
+        "object" : "checkins2",
+        "totalObservations" : "170",
+        "variables" : "2"
+    },
+    "relative_order" : 26,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

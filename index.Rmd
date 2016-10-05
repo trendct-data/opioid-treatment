@@ -30,6 +30,10 @@ library(rgdal)
 require(maptools)
 library(stringr)
 library(knitr)
+library(lubridate)
+library("censusapi")
+source("keys.R")
+
 treat <- read.csv("https://data.ct.gov/api/views/4pv7-jhxb/rows.csv?accessType=DOWNLOAD", stringsAsFactors=F)
 
 ```
@@ -200,9 +204,248 @@ gg
 
 ## Looking at deaths
 
-```{r deaths, message=F, warning=F}
+Prepping the data
+```{r deaths, message=F, warning=F, fig.width=8, fig.height=30}
 drug_deaths <- read.csv("https://data.ct.gov/api/views/rybz-nyjw/rows.csv?accessType=DOWNLOAD", stringsAsFactors = F)
 
+# Cleaning up race
+drug_deaths$R <- "Unknown"
+drug_deaths$R <- ifelse(drug_deaths$Race=="Asian Indian", "Asian", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Asian, Other", "Asian", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Chinese", "Asian", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Hispanic, Black", "Hispanic", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Hispanic, White", "Hispanic", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Hispanic, Black", "Hispanic", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Native American, Other", "Other", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="", "Unknown", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Asian", "Asian", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Black", "Black", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="Hispanic", "Hispanic", drug_deaths$R)
+drug_deaths$R <- ifelse(drug_deaths$Race=="White", "White", drug_deaths$R)
+
+# Cleaning up death and residence city locations
+
+drug_deaths <- ctnamecleaner(Death.City, drug_deaths)
+names(drug_deaths)[names(drug_deaths) == 'real.town.name'] <- 'town.of.death'
+drug_deaths$Residence.City <- gsub("  ", " ", drug_deaths$Residence.City)
+drug_deaths <- ctnamecleaner(Residence.City, drug_deaths)
+names(drug_deaths)[names(drug_deaths) == 'real.town.name'] <- 'town.of.residence'
+drug_deaths$residence.and.death <- ""
+drug_deaths$residence.and.death <- ifelse(drug_deaths$town.of.death == drug_deaths$town.of.residence, "Same town of death and residence", "Different town of death than residence")
+drug_deaths$residence.and.death <- ifelse(is.na(drug_deaths$town.of.death), "Town of death unknown", drug_deaths$residence.and.death)
+drug_deaths$residence.and.death <- ifelse(is.na(drug_deaths$town.of.residence), "Residence unknown", drug_deaths$residence.and.death)
+drug_deaths$residence.and.death <- ifelse((is.na(drug_deaths$town.of.residence) & (drug_deaths$Residence.State!="CT")), "Out of town resident, local death", drug_deaths$residence.and.death)
+drug_deaths$residence.and.death <- ifelse((is.na(drug_deaths$town.of.residence) & (drug_deaths$Residence.City=="")), "Unknown residence", drug_deaths$residence.and.death)
+
+drug_deaths$date.fixed <- mdy(drug_deaths$Date)
+drug_deaths$Year <- year(drug_deaths$date.fixed)
+drug_deaths$row <- row.names(drug_deaths)
+
+# fentanyl only
+new_fentanyl <- drug_deaths %>%
+  mutate(cause=str_to_lower(drug_deaths$ImmediateCauseA)) %>%
+  filter(grepl("fent", cause) | Fentanyl=="Y" )
+
+new_fent <-  select(new_fentanyl, row)
+new_fent$update_fent <- "Yes"
+new_fent <- as.data.frame(new_fent)
+drug_deaths <- left_join(drug_deaths, new_fent)
+  
+# heroin only
+
+new_heroin <- drug_deaths %>%
+  mutate(cause=str_to_lower(drug_deaths$ImmediateCauseA)) %>%
+  filter(grepl("heroin", cause) | Heroin=="Y" )
+
+new_her <- select(new_heroin, row)
+new_her$update_heroin <- "Yes"
+new_her <- as.data.frame(new_her)
+drug_deaths <- left_join(drug_deaths, new_her)
+
+# prescription opioids
+
+new_presc <- drug_deaths %>%
+  mutate(cause=str_to_lower(drug_deaths$ImmediateCauseA)) %>%
+  filter(grepl("oxy", cause) | Oxycodone=="Y" | Oxymorphone=="Y" |
+           grepl("hydro", cause) | Hydrocodone=="Y" |
+           grepl("tramad", cause) | Tramad=="Y" |
+           grepl("morphine", cause) | Morphine..not.heroin.=="Y" )
 
 
+new_pre <- select(new_presc, row)
+new_pre$update_presc <- "Yes"
+new_pre <- as.data.frame(new_pre)
+drug_deaths <- left_join(drug_deaths, new_pre)
+
+#leftover <- subset(drug_deaths, is.na(update_fent) & is.na(update_heroin) & is.na(update_presc))
+#ggplot(leftover, aes(Year)) + geom_bar()
+
+# There were about 461 cases that did not involve overdoses of prescription opioids, heroin, or fentanyl
+
+# OK, checkins and deaths by year and town
+
+
+# Prepping town and year dataframe
+
+towns_only <- data.frame(town_count[,1])
+colnames(towns_only) <- "town.of.residence"
+towns_only$Year <- 0
+
+for (i in 2012:2016) {
+  towns_only$Year <- i
+  if (i == 2012) {
+    mega_towns <- towns_only
+  } else {
+    mega_towns <- rbind(mega_towns, towns_only)
+  }
+}
+
+# First, deaths by town (just opioids)
+
+opioid_deaths <- drug_deaths %>%
+  filter(update_presc=="Yes") %>%
+  group_by(town.of.residence, Year) %>%
+  summarise(overdose.deaths=n())
+# 
+checkins <- tab2
+colnames(checkins) <- c("town.of.residence", "Year", "admissions", "pop", "per_capita_a")
+
+test <- left_join(mega_towns, checkins)
+test <- left_join(test, opioid_deaths)
+
+cor(test$admissions, test$overdose.deaths, use="complete.obs")
+cor(test$per_capita_a, test$overdose.deaths, use="complete.obs")
+test2 <- test
+test2$per_capita_o <- round(test2$overdose.deaths/test2$pop*10000,2)
+test2$overdose.deaths[is.na(test2$overdose.deaths)] <- 0
+cor(test2$admissions, test2$overdose.deaths, use="complete.obs")
+cor(test2$per_capita_a, test2$overdose.deaths, use="complete.obs")
+cor(test2$per_capita_a, test2$per_capita_o, use="complete.obs")
+
+test3 <- test2 %>%
+  select(town.of.residence, Year, per_capita_a, per_capita_o) %>%
+  gather("Type", "per.capita", 3:4)
+
+gg <- ggplot(test3, aes(x=Year, y=per.capita, group=Type, color=Type))
+gg <- gg + geom_line()
+gg <- gg + facet_wrap(~town.of.residence, scales="free", ncol=5)
+gg
+
+test4 <- test2 %>%
+  select(town.of.residence, Year, admissions, overdose.deaths) %>%
+  gather("Type", "Count", 3:4)
+
+gg <- ggplot(test4, aes(x=Year, y=Count, group=Type, color=Type))
+gg <- gg + geom_line()
+gg <- gg + facet_wrap(~town.of.residence, scales="free", ncol=5)
+gg
+```
+
+
+```{r town_totals}
+
+opioid_deaths2 <- drug_deaths %>%
+  filter(update_presc=="Yes") %>%
+  group_by(town.of.residence) %>%
+  summarise(overdose.deaths=n())
+# 
+checkins <- tab2
+colnames(checkins) <- c("town.of.residence", "Year", "admissions", "pop", "per_capita_a")
+
+checkins2 <- checkins %>%
+  group_by(town.of.residence) %>%
+  summarise(admissions=sum(admissions))
+
+town_totals <- left_join(towns_only, opioid_deaths2)
+town_totals <- left_join(town_totals, checkins2)
+
+
+cor(town_totals$admissions, town_totals$overdose.deaths, use="complete.obs")
+town_totals <- ctpopulator(town.of.residence, town_totals)
+
+town_totals$per_cap_o <- round(town_totals$overdose.deaths/town_totals$pop2013*1000,2)
+town_totals$per_cap_a <- round(town_totals$admissions/town_totals$pop2013*1000,2)
+cor(town_totals$per_cap_a, town_totals$per_cap_o, use="complete.obs")
+
+gg <- ggplot(town_totals, aes(x=overdose.deaths, y=admissions))
+gg <- gg + geom_point()
+gg <- gg + labs(x="Overdoses", y="Admissions", 
+                title="Overdose deaths compared to clinical admissions by town",
+                subtitle="",
+                caption="Department of Mental Health and Addiction Services")
+gg
+
+gg <- ggplot(town_totals, aes(x=per_cap_o, y=per_cap_a))
+gg <- gg + geom_point()
+gg <- gg + labs(x="Overdoses per capita", y="Admissions per capita", 
+                title="Overdose deaths compared to clinical admissions by town (per 1,000 residents)",
+                subtitle="",
+                caption="Department of Mental Health and Addiction Services")
+gg
+
+```
+
+
+# Income
+
+
+```{r towns_income_admissions}
+
+
+vars2014 <- listCensusMetadata(name="acs5", vintage=2014, "v")
+View(vars2014)
+
+data2014 <- getCensus(name="acs5", 
+                      vintage=2014,
+                      key=census_key, 
+                      vars=c("NAME", "B19013_001E"), 
+                      region="county subdivision:*",  regionin="state:09")
+data2014$town.of.residence <- gsub(" town.*", "", data2014$NAME)
+data2014 <- subset(data2014, !is.na(B19013_001E))
+data2014 <- data2014[,5:6]
+
+colnames(data2014) <- c("median.income", "town.of.residence")
+
+town_totals2 <- town_totals 
+town_totals2$town.of.residence <- str_to_title(town_totals2$town.of.residence)
+town_totals2 <- left_join(town_totals2, data2014)
+
+cor(town_totals2$per_cap_a, town_totals2$median.income, use="complete.obs")
+
+gg <- ggplot(town_totals2, aes(x=median.income, y=per_cap_o))
+gg <- gg + geom_point()
+gg <- gg + labs(x="Median income", y="Admissions per capita", 
+                title="Clinical admissions by town (per 1,000 residents) compared to median income",
+                subtitle="",
+                caption="Department of Mental Health and Addiction Services")
+gg
+
+
+```
+
+
+```{r box3}
+
+# join test to urban dataframe, whatever that is
+# 
+# p <- ggplot(tab2_joined, aes(x=town_type, y=per_capita_a,fill=town_type))
+# gg <- gg +  geom_boxplot()
+# gg <- gg +  facet_grid(.~FiscalYear)
+# gg <- gg + labs(x=NULL, y="Admissions per capita", title="Overall opioid-related checkins in Connecticut",
+#                 subtitle="Per 1,000 residents",
+#                 caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+# gg <- gg + theme_bw(base_family="Lato Regular")
+# gg <- gg + theme(text = element_text(size=16))
+# gg <- gg + theme(panel.grid.major=element_blank())
+# gg <- gg + theme(panel.grid.minor=element_blank())
+# gg <- gg + theme(panel.border=element_blank())
+# gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+# #gg <- gg + theme(axis.ticks=element_blank())
+# #gg <- gg + theme(axis.text.y=element_blank())
+# gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+# gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+# gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+# gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+# 
+# gg
 ```

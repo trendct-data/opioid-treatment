@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475684203873.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "6C9805C4",
+    "lastKnownWriteTime" : 4318887936,
+    "last_content_update" : 1475684203873,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "22xkfus8ix",
+        "caption" : "checkins",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=checkins&cache_key=22xkfus8ix",
+        "displayedObservations" : "850",
+        "environment" : "",
+        "object" : "checkins",
+        "totalObservations" : "850",
+        "variables" : "5"
+    },
+    "relative_order" : 16,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

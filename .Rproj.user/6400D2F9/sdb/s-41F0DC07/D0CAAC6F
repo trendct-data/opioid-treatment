@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "census_key <- \"b98ef3b1ee67242f791a7ee03a431feb28d1abd3\"",
+    "created" : 1475688924242.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3412635629",
+    "id" : "D0CAAC6F",
+    "lastKnownWriteTime" : 1475688963,
+    "last_content_update" : 1475688963039,
+    "path" : "~/Documents/Github/trendct-data/2016/10/opioid-treatment/keys.R",
+    "project_path" : "keys.R",
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 18,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

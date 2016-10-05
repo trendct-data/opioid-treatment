@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475684109628.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "E4493F4D",
+    "lastKnownWriteTime" : 3414137952484196358,
+    "last_content_update" : 1475684109628,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "wnr209ku66",
+        "caption" : "opioid_deaths",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=opioid_deaths&cache_key=wnr209ku66",
+        "displayedObservations" : "327",
+        "environment" : "",
+        "object" : "opioid_deaths",
+        "totalObservations" : "327",
+        "variables" : "3"
+    },
+    "relative_order" : 3,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

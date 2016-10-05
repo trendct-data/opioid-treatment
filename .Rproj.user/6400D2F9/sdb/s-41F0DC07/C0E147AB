@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475694274283.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "C0E147AB",
+    "lastKnownWriteTime" : 3414137952484196358,
+    "last_content_update" : 1475694274283,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "by2xvfafdj",
+        "caption" : "town_totals",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=town_totals&cache_key=by2xvfafdj",
+        "displayedObservations" : "169",
+        "environment" : "",
+        "object" : "town_totals",
+        "totalObservations" : "169",
+        "variables" : "7"
+    },
+    "relative_order" : 28,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

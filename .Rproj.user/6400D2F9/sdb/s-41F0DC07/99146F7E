@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475690013118.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "99146F7E",
+    "lastKnownWriteTime" : 4294967296,
+    "last_content_update" : 1475690013118,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "sjlv5pp1lt",
+        "caption" : "mega_towns",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=mega_towns&cache_key=sjlv5pp1lt",
+        "displayedObservations" : 845,
+        "environment" : "",
+        "object" : "mega_towns",
+        "totalObservations" : 845,
+        "variables" : 2
+    },
+    "relative_order" : 24,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

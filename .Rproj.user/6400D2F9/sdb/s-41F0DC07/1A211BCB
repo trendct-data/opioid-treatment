@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475689640102.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "1A211BCB",
+    "lastKnownWriteTime" : 6,
+    "last_content_update" : 1475689640102,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "dq88c70qv5",
+        "caption" : "town_count_uace2",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=town_count_uace2&cache_key=dq88c70qv5",
+        "displayedObservations" : 170,
+        "environment" : "",
+        "object" : "town_count_uace2",
+        "totalObservations" : 170,
+        "variables" : 2
+    },
+    "relative_order" : 20,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

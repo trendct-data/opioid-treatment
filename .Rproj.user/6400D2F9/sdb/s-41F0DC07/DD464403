@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475682444983.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "DD464403",
+    "lastKnownWriteTime" : 4612736512,
+    "last_content_update" : 1475682444983,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "ajt3oyltmx",
+        "caption" : "leftover",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=leftover&cache_key=ajt3oyltmx",
+        "displayedObservations" : "461",
+        "environment" : "",
+        "object" : "leftover",
+        "totalObservations" : "461",
+        "variables" : "41"
+    },
+    "relative_order" : 10,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

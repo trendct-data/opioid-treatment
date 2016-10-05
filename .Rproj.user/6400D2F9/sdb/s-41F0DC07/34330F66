@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475674375526.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "34330F66",
+    "lastKnownWriteTime" : 1475672029,
+    "last_content_update" : 1475674375526,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "ij8hxm4qhs",
+        "caption" : "drug_deaths",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=drug_deaths&cache_key=ij8hxm4qhs",
+        "displayedObservations" : "2572",
+        "environment" : "",
+        "object" : "drug_deaths",
+        "totalObservations" : "2572",
+        "variables" : "41"
+    },
+    "relative_order" : 8,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}

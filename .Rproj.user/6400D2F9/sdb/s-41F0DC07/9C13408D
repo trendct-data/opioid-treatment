@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475679703112.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "9C13408D",
+    "lastKnownWriteTime" : -4611686014132420864,
+    "last_content_update" : 1475679703112,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "4fgkyhooqm",
+        "caption" : "new_fentanyl",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=new_fentanyl&cache_key=4fgkyhooqm",
+        "displayedObservations" : 539,
+        "environment" : "",
+        "object" : "new_fentanyl",
+        "totalObservations" : 539,
+        "variables" : 36
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
