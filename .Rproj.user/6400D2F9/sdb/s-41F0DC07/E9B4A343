@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "# Analyzing Opioid Related Treatment Admissions in Connecticut\n\n*A story in progress*\n\nData from the [Department of Mental Health and Addiction Services](https://data.ct.gov/Health-and-Human-Services/Opioid-Related-Treatment-Admsissions-by-Town-in-De/4pv7-jhxb)\n\n```description\nTown level data on depicting the number of admissions, and individuals served per year in treatment programs funded or operated by the Department of Mental Health and Addiction Services, where the primary drug at admission was an opioid.\n\nClients entering these programs were treated for their opioid related disorder as a result of it being the primary drug at the time of admission. This dataset does not reflect ALL individuals in Connecticut who have participated in an opioid related treatment program, but only service provided by the Department of Mental Health and Addiction Services, nor are these programs specifically designated as \"opioid treatment.\"\n\n**Values less than or equal to 5 and greater than 0 have been suppressed to protect the indentity of individuals.**\n\n```",
+    "created" : 1475672034879.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "3773794262",
+    "id" : "E9B4A343",
+    "lastKnownWriteTime" : 1475672361,
+    "last_content_update" : 1475672361229,
+    "path" : "~/Documents/Github/trendct-data/2016/10/opioid-treatment/readme.md",
+    "project_path" : "readme.md",
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 9,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "markdown"
+}

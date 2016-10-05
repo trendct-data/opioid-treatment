@@ -1,0 +1,21 @@
+{
+    "collab_server" : "",
+    "contents" : "## If you don't have the following packages installed, uncomment and run the line below\n#devtools::install_github(\"ropensci/plotly\")\n## install.packages(\"dplyr\")\n## install.packages(\"ggplot2\")\n\nlibrary(dplyr)\nlibrary(ggplot2)\nlibrary(plotly)\n## What determines if a town is Urban or Rural or Mixed?\n## The U.S. Census Bureau defines urban and rural at the block level. \n## Therefore, geographic entities, including cities, towns and census tracts,\n## may be urban (located wholly within an urban area), \n## rural (located entirely outside an urban area), \n## or contain both urban and rural territory (only the densely settled portion of the city is within an urban area). \n## https://ask.census.gov/faq.php?id=5000&faqId=6403\n\n## Bringing in the Urban Area Relationship files for each county in Connecticut\n## You can get your state's here ## https://ask.census.gov/faq.php?id=5000&faqId=6403\n\nuace <- read.csv(\"data/uace1.csv\", stringsAsFactors=FALSE)\nuace2 <- read.csv(\"data/uace2.csv\", stringsAsFactors=FALSE)\nuace <- rbind(uace, uace2)\n\nuace3 <- read.csv(\"data/uace3.csv\", stringsAsFactors=FALSE)\nuace <- rbind(uace, uace3)\n\nuace4 <- read.csv(\"data/uace4.csv\", stringsAsFactors=FALSE)\nuace <- rbind(uace, uace4)\nuace5 <- read.csv(\"data/uace5.csv\", stringsAsFactors=FALSE)\nuace <- rbind(uace, uace5)\nuace6 <- read.csv(\"data/uace6.csv\", stringsAsFactors=FALSE)\nuace <- rbind(uace, uace6)\nuace7 <- read.csv(\"data/uace7.csv\", stringsAsFactors=FALSE)\nuace <- rbind(uace, uace7)\nuace8 <- read.csv(\"data/uace8.csv\", stringsAsFactors=FALSE)\nuace <- rbind(uace, uace8)\n\nnrow(uace) + nrow(uace2) + nrow(uace3)+ nrow(uace4)+ nrow(uace5)+ nrow(uace6)+ nrow(uace7)+ nrow(uace8)\n\n## Bringing in a list of town (county subdivision) names from the Census\n## In order to match town names to census blocks/tracts\n\ntowns_list <- read.csv(\"data/urban_suburban.csv\")\n\ntowns_list <- towns_list[c(\"COUSUBFP10\", \"COUSUBNS10\", \"GEOID10\", \"NAME10\")]\nuace <- uace[c(\"COUSUBFP10\", \"UACE10\")]\n\ntowns_list_uace <- left_join(uace, towns_list)\n\n# Determining if a town is Urban or Rural or Mixed (Suburban)\n\ntown_count_uace <- towns_list_uace %>%\n  group_by(NAME10) %>%\n  summarise(Count=n())\n\ntown_count <- left_join(towns_list, town_count_uace)\n\ntown_count_uace2 <- towns_list_uace %>%\n  group_by(NAME10) %>%\n  summarise(Blank=sum(is.na(UACE10)))\n\ntown_count <- left_join(town_count, town_count_uace2)\n\ntown_count <- subset(town_count, NAME10!=\"County subdivisions not defined\")\ntown_count$Type <- \"blank\"\n\ntown_count$perc_urban <- round((town_count$Count - town_count$Blank)/town_count$Count*100,2)\n\n## Just to stop briefly to talk about what's going on\n\nhead(town_count)\n\n## The Count column is the number of census tracts there are in a town\n## The Blank column is the number of census tracts in the town that is Rural\n## The perc_urban is the how much a municipality is urban\n\n\n## The loop below fills in the Type column: Urban, Rural, Mixed?\n\nfor (i in 1:nrow(town_count)) {\n  # Set the threshold for what percent is enough\n  # for a town to be considered urban. Census says 100.\n  if (town_count$perc_urban[i]>=100) {\n    town_count$Type[i] <- \"Urban\"\n  } else if (town_count$Blank[i]==town_count$Count[i]) {\n    town_count$Type[i] <- \"Rural\"\n  } else {\n    town_count$Type[i] <- \"Mixed\"\n  }\n}\n",
+    "created" : 1475634100225.000,
+    "dirty" : false,
+    "encoding" : "UTF-8",
+    "folds" : "",
+    "hash" : "2577095808",
+    "id" : "A7C76E13",
+    "lastKnownWriteTime" : 1475634176,
+    "last_content_update" : 1475634176622,
+    "path" : "~/Documents/Github/trendct-data/2016/10/opioid-treatment/urban_rural_mixed.R",
+    "project_path" : "urban_rural_mixed.R",
+    "properties" : {
+        "tempName" : "Untitled2"
+    },
+    "relative_order" : 7,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_source"
+}

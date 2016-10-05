@@ -1,0 +1,208 @@
+---
+title: "Opioid treatment checkins"
+author: "Andrew Ba Tran"
+date: "October 4, 2016"
+output: html_document
+---
+
+Questions to ask:
+
+- Which towns had the most admissions per capita?
+- Urban versus rural versus mixed admissions?
+Is there a correlation between admissions and overdose deaths? (By year)
+
+Where do people tend to die (urban, rural, mixed)
+
+distance to clinics, pharmacies, hospitals
+
+correlation between deaths and admissions to these distances?
+
+
+
+```{r setup, include=FALSE}
+library(dplyr)
+library(tidyr)
+library(ctnamecleaner)
+library(ggplot2)
+library(extrafont)
+library(scales)
+library(rgdal)
+require(maptools)
+library(stringr)
+library(knitr)
+treat <- read.csv("https://data.ct.gov/api/views/4pv7-jhxb/rows.csv?accessType=DOWNLOAD", stringsAsFactors=F)
+
+```
+
+```{r total_town_year, message=F, warning=F, fig.width=8, fig.height=35}
+
+treat$Admissions[is.na(treat$Admissions)] <- 0
+
+gg <- ggplot(treat, aes(y=Admissions, x=FiscalYear))
+gg <- gg + geom_bar(stat="identity")
+gg <- gg + facet_wrap(~Town, ncol=4, scale="free_x")
+#gg <- gg + facet_wrap(~state, scale="free", ncol=5)
+#gg <- gg + scale_x_continuous(limits=c(2012,2016), breaks=c(2012,2016),
+#        labels=c("2012", "2016"))
+gg <- gg + labs(x=NULL, y=NULL, 
+                title="Opioid Related Treatment Admissions by Town",
+                subtitle="",
+                caption="Department of Mental Health and Addiction Services")
+gg <- gg + theme_minimal(base_family="Lato Regular")
+gg <- gg + theme(panel.grid.major.y=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(plot.title=element_text(family="Lato Black"))
+gg
+
+
+# gg <- ggplot(treat, aes(y=Unduplicated.Clients, x=FiscalYear))
+# gg <- gg + geom_bar(stat="identity")
+# gg <- gg + facet_wrap(~Town, ncol=4, scale="free_x")
+# #gg <- gg + facet_wrap(~state, scale="free", ncol=5)
+# #gg <- gg + scale_x_continuous(limits=c(2012,2016), breaks=c(2012,2016),
+# #        labels=c("2012", "2016"))
+# gg <- gg + labs(x=NULL, y=NULL, 
+#                 title="Opioid Related Treatment Admissions (unduplicated clients) by Town",
+#                 subtitle="",
+#                 caption="Department of Mental Health and Addiction Services")
+# gg <- gg + theme_minimal(base_family="Lato Regular")
+# gg <- gg + theme(panel.grid.major.y=element_blank())
+# gg <- gg + theme(panel.grid.minor=element_blank())
+# gg <- gg + theme(plot.title=element_text(family="Lato Black"))
+# gg
+```
+
+```{r total_town_year_per_capita, message=F, warning=F, fig.width=8, fig.height=35}
+
+treat$Admissions[is.na(treat$Admissions)] <- 0
+treat <- ctpopulator(Town, treat)
+treat$per_capita_a <- round(treat$Admissions/treat$pop2013*1000, 2)
+
+gg <- ggplot(treat, aes(y=per_capita_a, x=FiscalYear))
+gg <- gg + geom_bar(stat="identity")
+gg <- gg + facet_wrap(~Town, ncol=4, scale="free_x")
+#gg <- gg + facet_wrap(~state, scale="free", ncol=5)
+#gg <- gg + scale_x_continuous(limits=c(2012,2016), breaks=c(2012,2016),
+#        labels=c("2012", "2016"))
+gg <- gg + labs(x=NULL, y=NULL, 
+                title="Opioid Related Treatment Admissions per 1,000 residents by Town",
+                subtitle="",
+                caption="Department of Mental Health and Addiction Services")
+gg <- gg + theme_minimal(base_family="Lato Regular")
+gg <- gg + theme(panel.grid.major.y=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(plot.title=element_text(family="Lato Black"))
+gg
+```
+
+# Mapped
+
+```{r map1, message=F, warning=F, fig.width=9, fig.height=9}
+
+town_shape <- readOGR(dsn="maps", layer="ctgeo")
+town_shape_df <- fortify(town_shape, region="NAME10")
+
+names(treat)[names(treat) == 'Town'] <- 'id'
+treat$id <- str_to_title(treat$id)
+town_map <- left_join(town_shape_df, treat)
+
+gg <- ggplot(town_map, aes(long,lat, group=group, fill=per_capita_a)) 
+gg <- gg +  geom_polygon()
+gg <- gg +  geom_path(color = "grey73")
+gg <- gg +  coord_equal()
+gg <- gg + facet_wrap(~FiscalYear, ncol=2)
+gg <- gg + scale_fill_gradient(low="grey73", high="blue") 
+gg <- gg + labs(x=NULL, y=NULL, title="Opioid Related Treatment Admissions by town",
+                subtitle="Per 1,000 residents",
+                caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg + theme(axis.ticks=element_blank())
+gg <- gg + theme(axis.text.x=element_blank())
+gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+
+gg
+
+```
+
+# Towns with most check-ins per capita
+
+```{r table1}
+tab1 <- treat %>%
+  select(id, FiscalYear, per_capita_a) %>%
+  spread(FiscalYear, per_capita_a) %>%
+  arrange(-`2016`)
+  kable(head(tab1, 10))
+```
+
+# Check-ins by town type
+
+```{r town_type1, fig.width=9, fig.height=5, warning=F, message=F} 
+source("urban_rural_mixed.R")
+
+town_count <- town_count[c("NAME10", "Type", "perc_urban")]
+colnames(town_count) <- c("id", "town_type", "perc_urban")
+
+tab2 <- treat %>%
+  select(id, FiscalYear, Admissions, pop2013, per_capita_a)
+
+tab2_joined <- left_join(tab2, town_count)
+
+gg <- ggplot(tab2_joined, aes(x=town_type, y=Admissions,fill=town_type))
+gg <- gg +  geom_boxplot()
+gg <- gg +  facet_wrap(~FiscalYear, ncol=5)
+gg <- gg + labs(x=NULL, y="Admissions", title="Overall opioid-related checkins in Connecticut",
+                subtitle="Per 1,000 residents",
+                caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg +  theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+#gg <- gg + theme(axis.ticks=element_blank())
+#gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+
+gg
+
+p <- ggplot(tab2_joined, aes(x=town_type, y=per_capita_a,fill=town_type))
+gg <- gg +  geom_boxplot()
+gg <- gg +  facet_grid(.~FiscalYear)
+gg <- gg + labs(x=NULL, y="Admissions per capita", title="Overall opioid-related checkins in Connecticut",
+                subtitle="Per 1,000 residents",
+                caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+#gg <- gg + theme(axis.ticks=element_blank())
+#gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+
+gg
+```
+
+## Looking at deaths
+
+```{r deaths, message=F, warning=F}
+drug_deaths <- read.csv("https://data.ct.gov/api/views/rybz-nyjw/rows.csv?accessType=DOWNLOAD", stringsAsFactors = F)
+
+
+
+```

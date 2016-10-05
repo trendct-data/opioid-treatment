@@ -1,0 +1,28 @@
+{
+    "collab_server" : "",
+    "contents" : "",
+    "created" : 1475631396823.000,
+    "dirty" : false,
+    "encoding" : "",
+    "folds" : "",
+    "hash" : "0",
+    "id" : "E3EB246B",
+    "lastKnownWriteTime" : 4753643016,
+    "last_content_update" : 1475631396823,
+    "path" : null,
+    "project_path" : null,
+    "properties" : {
+        "cacheKey" : "7kphwysz5v",
+        "caption" : "town_shape_df",
+        "contentUrl" : "grid_resource/gridviewer.html?env=&obj=town_shape_df&cache_key=7kphwysz5v",
+        "displayedObservations" : "15366",
+        "environment" : "",
+        "object" : "town_shape_df",
+        "totalObservations" : "15366",
+        "variables" : "7"
+    },
+    "relative_order" : 4,
+    "source_on_save" : false,
+    "source_window" : "",
+    "type" : "r_dataframe"
+}
