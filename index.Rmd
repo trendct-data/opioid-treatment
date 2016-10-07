@@ -390,11 +390,6 @@ gg
 
 
 ```{r towns_income_admissions}
-
-
-vars2014 <- listCensusMetadata(name="acs5", vintage=2014, "v")
-View(vars2014)
-
 data2014 <- getCensus(name="acs5", 
                       vintage=2014,
                       key=census_key, 
@@ -412,7 +407,7 @@ town_totals2 <- left_join(town_totals2, data2014)
 
 cor(town_totals2$per_cap_a, town_totals2$median.income, use="complete.obs")
 
-gg <- ggplot(town_totals2, aes(x=median.income, y=per_cap_o))
+gg <- ggplot(town_totals2, aes(x=median.income, y=per_cap_a))
 gg <- gg + geom_point()
 gg <- gg + labs(x="Median income", y="Admissions per capita", 
                 title="Clinical admissions by town (per 1,000 residents) compared to median income",
@@ -420,32 +415,64 @@ gg <- gg + labs(x="Median income", y="Admissions per capita",
                 caption="Department of Mental Health and Addiction Services")
 gg
 
+cor(town_totals2$per_cap_o, town_totals2$median.income, use="complete.obs")
 
+gg <- ggplot(town_totals2, aes(x=median.income, y=per_cap_o))
+gg <- gg + geom_point()
+gg <- gg + labs(x="Median income", y="Overdoses per capita", 
+                title="Opioid overdoses by town (per 1,000 residents) compared to median income",
+                subtitle="",
+                caption="Department of Mental Health and Addiction Services")
+gg
 ```
 
 
-```{r box3}
+```{r box3, fig.width=9, fig.height=5, warning=F, message=F}
+tab3_joined <- town_count
+colnames(tab3_joined) <- c("town.of.residence", "town_type", "perc_urban")
+tab3_joined <- left_join(test2, tab3_joined)
 
-# join test to urban dataframe, whatever that is
-# 
-# p <- ggplot(tab2_joined, aes(x=town_type, y=per_capita_a,fill=town_type))
-# gg <- gg +  geom_boxplot()
-# gg <- gg +  facet_grid(.~FiscalYear)
-# gg <- gg + labs(x=NULL, y="Admissions per capita", title="Overall opioid-related checkins in Connecticut",
-#                 subtitle="Per 1,000 residents",
-#                 caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
-# gg <- gg + theme_bw(base_family="Lato Regular")
-# gg <- gg + theme(text = element_text(size=16))
-# gg <- gg + theme(panel.grid.major=element_blank())
-# gg <- gg + theme(panel.grid.minor=element_blank())
-# gg <- gg + theme(panel.border=element_blank())
-# gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
-# #gg <- gg + theme(axis.ticks=element_blank())
-# #gg <- gg + theme(axis.text.y=element_blank())
-# gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
-# gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
-# gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
-# gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
-# 
-# gg
+
+gg <- ggplot(tab3_joined, aes(x=town_type, y=per_capita_o, group=town_type, fill=town_type))
+gg <- gg +  geom_boxplot()
+gg <- gg +  facet_grid(.~Year)
+gg <- gg + labs(x=NULL, y="Overdoses per capita", title="Adjusted opioid-related overdoses in Connecticut",
+                subtitle="Per 1,000 residents",
+                caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+#gg <- gg + theme(axis.ticks=element_blank())
+#gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+gg
+```
+
+```{r scatter2, fig.width=9, fig.height=12}
+gg <- ggplot(tab3_joined, aes(x=per_capita_a, y=per_capita_o, group=town_type, color=town_type))
+gg <- gg +  geom_point()
+gg <- gg +  facet_wrap(~Year, ncol=2)
+gg <- gg + labs(x="Admissions per capita", y="Overdoses per capita", title="Opioid-related overdoses compared to treatment admissions",
+                subtitle="Per 1,000 residents",
+                caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+#gg <- gg + theme(axis.ticks=element_blank())
+#gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+gg
+
 ```
