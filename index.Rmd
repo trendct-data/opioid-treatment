@@ -163,7 +163,7 @@ gg <- ggplot(tab2_joined, aes(x=town_type, y=Admissions,fill=town_type))
 gg <- gg +  geom_boxplot()
 gg <- gg +  facet_wrap(~FiscalYear, ncol=5)
 gg <- gg + labs(x=NULL, y="Admissions", title="Overall opioid-related checkins in Connecticut",
-                subtitle="Per 1,000 residents",
+                subtitle="",
                 caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
 gg <- gg + theme_bw(base_family="Lato Regular")
 gg <- gg + theme(text = element_text(size=16))
@@ -180,10 +180,10 @@ gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
 
 gg
 
-p <- ggplot(tab2_joined, aes(x=town_type, y=per_capita_a,fill=town_type))
+gg <- ggplot(tab2_joined, aes(x=town_type, y=per_capita_a,fill=town_type))
 gg <- gg +  geom_boxplot()
 gg <- gg +  facet_grid(.~FiscalYear)
-gg <- gg + labs(x=NULL, y="Admissions per capita", title="Overall opioid-related checkins in Connecticut",
+gg <- gg + labs(x=NULL, y="Admissions per capita", title="Adjusted opioid-related checkins in Connecticut",
                 subtitle="Per 1,000 residents",
                 caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
 gg <- gg + theme_bw(base_family="Lato Regular")
@@ -354,7 +354,7 @@ colnames(checkins) <- c("town.of.residence", "Year", "admissions", "pop", "per_c
 
 checkins2 <- checkins %>%
   group_by(town.of.residence) %>%
-  summarise(admissions=sum(admissions))
+  summarise(admissions=sum(admissions, na.rm=T))
 
 town_totals <- left_join(towns_only, opioid_deaths2)
 town_totals <- left_join(town_totals, checkins2)
@@ -474,5 +474,189 @@ gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin
 gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
 gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
 gg
+```
 
+```{r combined, fig.width=9, fig.height=6}
+combined <- tab3_joined %>%
+  group_by(town.of.residence, town_type) %>%
+  summarise(admissions=sum(admissions, na.rm=T), pop=mean(pop), overdose.deaths=sum(overdose.deaths, na.rm=T)) %>%
+  mutate(per_capita_a=round(admissions/pop*1000,2), per_capita_o=round(overdose.deaths/pop*1000,2))
+
+gg <- ggplot(combined, aes(x=per_capita_a, y=per_capita_o, group=town_type, color=town_type))
+gg <- gg +  geom_point()
+gg <- gg + labs(x="Admissions per capita", y="Overdoses per capita", title="Opioid-related overdoses compared to treatment admissions",
+                subtitle="Per 1,000 residents",
+                caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+#gg <- gg + theme(axis.ticks=element_blank())
+#gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+gg
+
+```
+
+# Death found
+
+```{r death_found}
+
+town_count_merge <- town_count
+colnames(town_count_merge) <- c("town.of.residence", "town_type", "perc_urban")
+drug_deaths_mega <- left_join(drug_deaths, town_count_merge)
+kable(table(drug_deaths_mega$InjuryPlace, drug_deaths_mega$town_type))
+
+drug_deaths_mega$Location2 <- drug_deaths_mega$Location
+drug_deaths_mega$Location2 <- gsub("Convalescent Home", "Other", drug_deaths_mega$Location2)
+drug_deaths_mega$Location2[is.na(drug_deaths_mega$Location2)] <- "Other"
+
+kable(table(drug_deaths_mega$Location2, drug_deaths_mega$town_type))
+
+percent_type <- drug_deaths_mega %>%
+  group_by(Location2, town_type) %>%
+  summarise(total=n()) %>%
+  mutate(percent=round(total/sum(total, na.rm=T)*100,2)) %>%
+  select(Location2, town_type, percent) %>%
+  spread(town_type, percent)
+kable(percent_type)
+
+percent_type2 <- drug_deaths_mega %>%
+  group_by(town_type, Location2) %>%
+  summarise(total=n()) %>%
+  mutate(percent=round(total/sum(total, na.rm=T)*100,2)) %>%
+  select(town_type, Location2, percent) %>%
+  spread(town_type, percent)
+kable(percent_type2)
+```
+
+```{r location_info, fig.width=9, fig.height=7}
+
+location_info <- drug_deaths_mega %>%
+  group_by(residence.and.death) %>%
+  summarise(deaths=n())
+  
+gg <- ggplot(location_info, aes(residence.and.death, deaths)) 
+gg <- gg + geom_bar(stat="identity")
+gg <- gg + labs(x=NULL, y="Overdoses", title="Overdoses by location type",
+                subtitle="",
+                caption="SOURCE: Department of Mental Health and Addiction Services, Medical Examiner's Office\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+#gg <- gg + theme(axis.ticks=element_blank())
+#gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+gg
+
+
+```
+
+```{r big_frame, fig.height=10, fig.width=8}
+
+
+pharm <- read.csv("https://data.ct.gov/api/views/2vby-9bet/rows.csv?accessType=DOWNLOAD", stringsAsFactors=F)
+pharm <- ctnamecleaner(City, pharm)
+
+pharm <- pharm %>%
+  group_by(real.town.name) %>%
+  summarise(pharmacies=n())
+colnames(pharm) <- c("town.of.residence", "pharm")
+
+counselors <- read.csv("https://data.ct.gov/api/views/jixj-wkjd/rows.csv?accessType=DOWNLOAD", stringsAsFactors=F)
+
+counselors <- subset(counselors, State=="CT")
+counselors <- ctnamecleaner(City, counselors)
+
+counselors <- counselors %>%
+  group_by(real.town.name) %>%
+  summarise(counselors=n())
+colnames(counselors) <- c("town.of.residence", "couns")
+
+
+drop <- read.csv("https://data.ct.gov/api/views/h7ba-v8cg/rows.csv?accessType=DOWNLOAD", stringsAsFactors = F)
+drop <- ctnamecleaner(City, drop)
+
+drop <- drop %>%
+  group_by(real.town.name) %>%
+  summarise(drop=n())
+colnames(drop) <- c("town.of.residence", "drop.offs")
+
+combined2 <- left_join(combined, pharm)
+combined2 <- left_join(combined2, counselors)
+combined2 <- left_join(combined2, drop)
+
+combined2$per_capita_p <- round(combined2$pharm/combined2$pop*10000,2)
+combined2$per_capita_c <- round(combined2$couns/combined2$pop*10000,2)
+combined2$per_capita_d <- round(combined2$drop.offs/combined2$pop*10000,2)
+
+combined3 <- combined2 %>%
+  select(town.of.residence, town_type, per_capita_a, per_capita_o, per_capita_p, per_capita_c, per_capita_d) %>%
+  gather("type", "per_capita", 3:7)
+
+combined3$type <- ifelse(combined3$type=="per_capita_a", "admissions", combined3$type )
+combined3$type <- ifelse(combined3$type=="per_capita_o", "overdoses", combined3$type )
+combined3$type <- ifelse(combined3$type=="per_capita_p", "pharmacies", combined3$type )
+combined3$type <- ifelse(combined3$type=="per_capita_c", "counselors", combined3$type )
+combined3$type <- ifelse(combined3$type=="per_capita_d", "drop.offs", combined3$type )
+
+
+
+
+gg <- ggplot(combined3, aes(x=town_type, y=per_capita, group=town_type, fill=town_type))
+gg <- gg +  geom_boxplot()
+gg <- gg +  facet_wrap(~type, ncol=2, scales="free")
+gg <- gg + labs(x=NULL, y=NULL, title="Connecticut",
+                subtitle="Per 1,000 residents",
+                caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+#gg <- gg + theme(axis.ticks=element_blank())
+#gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+gg
+
+
+combined4 <- combined2 %>%
+  select(town.of.residence, town_type, admissions, overdose.deaths, pharm, couns, drop.offs) %>%
+  gather("type", "total", 3:7)
+
+
+gg <- ggplot(combined4, aes(x=town_type, y=total, group=town_type, fill=town_type))
+gg <- gg +  geom_boxplot()
+gg <- gg +  facet_wrap(~type, ncol=2, scales="free")
+gg <- gg + labs(x=NULL, y=NULL, title="Connecticut",
+                subtitle="",
+                caption="SOURCE: Department of Mental Health and Addiction Services\nAndrew Ba Tran/TrendCT.org")
+gg <- gg + theme_bw(base_family="Lato Regular")
+gg <- gg + theme(text = element_text(size=16))
+gg <- gg + theme(panel.grid.major=element_blank())
+gg <- gg + theme(panel.grid.minor=element_blank())
+gg <- gg + theme(panel.border=element_blank())
+gg <- gg + theme(axis.text.x=element_text(angle=90, vjust=0.4,hjust=1))
+#gg <- gg + theme(axis.ticks=element_blank())
+#gg <- gg + theme(axis.text.y=element_blank())
+gg <- gg + theme(plot.title=element_text(face="bold", family="Lato Black", size=22))
+gg <- gg + theme(plot.subtitle=element_text(face="italic", size=9, margin=margin(b=12)))
+gg <- gg + theme(plot.caption=element_text(size=12, margin=margin(t=10, r=80), color="#7a7d7e"))
+gg <- gg + theme(plot.margin = unit(c(1, 1, 1, 1), "lines"))
+gg
 ```
